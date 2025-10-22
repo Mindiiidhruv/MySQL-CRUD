@@ -14,8 +14,8 @@ export const createUserTable = () => {
       )
     `;
     db.query(sql, (err) => {
-      if (err) console.log("❌ Table creation failed:", err.message);
-      else console.log("✅ Users table ready");
+      if (err) console.log("Table creation failed:", err.message);
+      else console.log("Users table ready");
     });
   });
 };
