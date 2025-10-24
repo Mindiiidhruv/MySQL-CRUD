@@ -3,7 +3,7 @@ import db from "../config/db.js";
 export const createUserTable = () => {
   // Select database first
   db.query(`USE ${process.env.DB_NAME}`, (err) => {
-    if (err) return console.log("❌ Database selection failed:", err.message);
+    if (err) return console.log("Database selection failed:", err.message);
 
     const sql = `
       CREATE TABLE IF NOT EXISTS users (

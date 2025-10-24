@@ -34,10 +34,26 @@ export const getUserById = (req, res) => {
 // Update user
 export const updateUser = (req, res) => {
   const { id } = req.params;
-  const { name, email, age } = req.body;
-  const sql = "UPDATE users SET name = ?, email = ?, age = ? WHERE id = ?";
-  db.query(sql, [name, email, age, id], (err, result) => {
+  const updates = req.body; // could be any combination of fields
+
+  // If no fields provided
+  if (Object.keys(updates).length === 0) {
+    return res.status(400).json({ error: "No fields provided for update" });
+  }
+
+  // Build dynamic SQL query
+  const fields = Object.keys(updates)
+    .map((key) => `${key} = ?`)
+    .join(", ");
+  const values = Object.values(updates);
+
+  const sql = `UPDATE users SET ${fields} WHERE id = ?`;
+
+  db.query(sql, [...values, id], (err, result) => {
     if (err) return res.status(500).json({ error: err.message });
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
     res.json({ message: "User updated successfully" });
   });
 };
