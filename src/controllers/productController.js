@@ -15,8 +15,13 @@ export const createProduct = (req, res) => {
   });
 };
 
-// Get all products with user details (JOIN)
 export const getProductsWithUser = (req, res) => {
+  const { search = "", page = 1, limit = 5, order = "asc" } = req.query;
+
+  const offset = (page - 1) * limit;
+
+  const sortOrder = order.toLowerCase() === "desc" ? "DESC" : "ASC";
+
   const sql = `
     SELECT 
       p.product_id,
@@ -27,12 +32,52 @@ export const getProductsWithUser = (req, res) => {
       u.email AS user_email
     FROM Products p
     JOIN users u ON p.user_id = u.id
+    WHERE 
+      p.product_name LIKE ? OR
+      u.name LIKE ? OR
+      u.email LIKE ?
+    ORDER BY p.product_name ${sortOrder}
+    LIMIT ? OFFSET ?
   `;
 
-  db.query(sql, (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.status(200).json(results);
-  });
+  const searchValue = `%${search}%`;
+
+  db.query(
+    sql,
+    [searchValue, searchValue, searchValue, parseInt(limit), offset],
+    (err, results) => {
+      if (err) return res.status(500).json({ error: err.message });
+
+      const countSql = `
+      SELECT COUNT(*) AS total 
+      FROM Products p
+      JOIN users u ON p.user_id = u.id
+      WHERE 
+        p.product_name LIKE ? OR
+        u.name LIKE ? OR
+        u.email LIKE ?
+    `;
+
+      db.query(
+        countSql,
+        [searchValue, searchValue, searchValue],
+        (countErr, countResult) => {
+          if (countErr)
+            return res.status(500).json({ error: countErr.message });
+
+          const total = countResult[0].total;
+          const totalPages = Math.ceil(total / limit);
+
+          res.status(200).json({
+            total,
+            totalPages,
+            currentPage: parseInt(page),
+            results,
+          });
+        }
+      );
+    }
+  );
 };
 
 // Get products for a specific user
