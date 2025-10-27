@@ -103,12 +103,10 @@ export const getProductsByUser = (req, res) => {
   });
 };
 
-/*
 export const updateProduct = (req, res) => {
   const { productId } = req.params;
-  const { product_name, product_amount } = req.body; // fields that can be updated
+  const { product_name, product_amount } = req.body;
 
-  // Build SQL dynamically based on provided fields
   let fields = [];
   let values = [];
 
@@ -117,7 +115,7 @@ export const updateProduct = (req, res) => {
     values.push(product_name);
   }
 
-  if (amount !== undefined) {
+  if (product_amount !== undefined) {
     fields.push("product_amount = ?");
     values.push(product_amount);
   }
@@ -126,7 +124,7 @@ export const updateProduct = (req, res) => {
     return res.status(400).json({ error: "No fields provided for update" });
   }
 
-  const sql = `UPDATE products SET ${fields.join(", ")} WHERE product_id = ?`;
+  const sql = `UPDATE Products SET ${fields.join(", ")} WHERE product_id = ?`;
   values.push(productId);
 
   db.query(sql, values, (err, result) => {
@@ -137,7 +135,6 @@ export const updateProduct = (req, res) => {
     res.status(200).json({ message: "Product updated successfully" });
   });
 };
-*/
 
 export const deleteProduct = (req, res) => {
   const { productId } = req.params;
